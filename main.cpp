@@ -2,7 +2,7 @@
 #include <time.h>
 using namespace sf;
 
-const int N = 30, M = 20, size = 16, w = size * N, h = size * M, Max_Snake_Length = 100, Snake_orig_length = 4;
+const int N = 30, M = 20, size = 16, w = size * N, BAR_HEIGHT = 5, h = size * (M + BAR_HEIGHT), Max_Snake_Length = 100, Snake_orig_length = 4;
 
 //////////////////// Change to class to present.  By Chien.
 
@@ -33,7 +33,7 @@ public:
 	void set_head_pos(const Pos& pos);
 	Pos get_i_pos(const int& i);
 
-	void Snake_Move();
+	bool Snake_Move();
 };
 class Fruit
 {
@@ -220,7 +220,7 @@ Pos Snake::get_i_pos(const int& i)
 	return this->s[i];
 }
 
-void Snake::Snake_Move()
+bool Snake::Snake_Move()
 {
 	//move the snake
 	for (int i = this->length; i > 0; --i)
@@ -234,11 +234,16 @@ void Snake::Snake_Move()
 	if (dir == 2) this->s[0].x += 1;
 	if (dir == 3) this->s[0].y -= 1;
 
-	if (this->s[0].x > N) this->s[0].x = 0;  if (this->s[0].x < 0) this->s[0].x = N;
-	if (this->s[0].y > M) this->s[0].y = 0;  if (this->s[0].y < 0) this->s[0].y = M;
+	if (this->s[0].x > N) this->s[0].x = 0;  
+	if (this->s[0].x < 0) this->s[0].x = N;
+	if (this->s[0].y > M) this->s[0].y = 0;  
+	if (this->s[0].y < 0) this->s[0].y = M;
 
 	for (int i = 1; i < length; i++)
-		if (this->s[0].x == this->s[i].x && this->s[0].y == this->s[i].y)  this->length = i;
+		if (this->s[0].x == this->s[i].x && this->s[0].y == this->s[i].y)
+			return false;
+			//this->length = i;
+	return true;
 }
 /////// End of Snake Constructors and Functions
 
@@ -323,15 +328,19 @@ int main()
 
 	RenderWindow window(VideoMode(w, h), "Snake Game!");
 
-	Texture t1, t2;
+	Texture t1, t2, t3;
 	t1.loadFromFile("images/white.png");
 	t2.loadFromFile("images/red.png");
+	t3.loadFromFile("images/game-over.png");
 
 	Sprite sprite1(t1);
 	Sprite sprite2(t2);
+	Sprite sprite3(t3);
 
 	Clock clock;
 	float timer = 0, delay = 0.1;
+
+	bool game_start = true;
 
 	Snake snake(0, 5, 5);
 	Fruit fruit(10, 10);
@@ -361,20 +370,25 @@ int main()
 
 		//////////////////// add end. By Chien.
 
-		if (timer > delay)
+		if (timer > delay && game_start)
 		{ 
-			timer = 0;
-			snake.Snake_Move();
-			if (snake.get_head_pos().x == fruit.get_pos().x && snake.get_head_pos().y == fruit.get_pos().y) {
-				fruit.got_eaten_by(snake);
+			if (snake.Snake_Move()) {
+				timer = 0;
+				if (snake.get_head_pos().x == fruit.get_pos().x && snake.get_head_pos().y == fruit.get_pos().y) {
+					fruit.got_eaten_by(snake);
+				}
+			}
+			else {
+				game_start = false;
 			}
 		}
+		
 
 		////// draw  ///////
 		window.clear();
 
 		for (int i = 0; i < N; i++)
-			for (int j = 0; j < M; j++)
+			for (int j = BAR_HEIGHT; j < M + BAR_HEIGHT; j++)
 			{
 				sprite1.setPosition(i*size, j*size);
 				window.draw(sprite1);
@@ -382,12 +396,18 @@ int main()
 
 		for (int i = 0; i < snake.get_length(); i++)
 		{
-			sprite2.setPosition(snake.get_i_pos(i).x*size, snake.get_i_pos(i).y*size);  
+			sprite2.setPosition(snake.get_i_pos(i).x*size, (snake.get_i_pos(i).y + BAR_HEIGHT)*size);
 			window.draw(sprite2);
 		}
 
-		sprite2.setPosition(fruit.get_pos().x*size, fruit.get_pos().y*size);
+		sprite2.setPosition(fruit.get_pos().x*size, (fruit.get_pos().y + BAR_HEIGHT)*size);
 		window.draw(sprite2);
+
+		// GameOver
+		if (!game_start) {
+			sprite3.setPosition(65, 0);
+			window.draw(sprite3);
+		}
 
 		window.display();
 	}
