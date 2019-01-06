@@ -1,24 +1,24 @@
 #include <SFML/Graphics.hpp>
-
+#include "const.hpp"
 using namespace sf;
 
-const int MAX_NUMBER_OF_ITEMS = 3;
+const int MAX_NUMBER_OF_FAILMENU_ITEMS = 2;
 
-class Menu
+class Fail
 {
 public:
-    Menu(float width, float height);
-    ~Menu();
+    Fail(float width, float height);
+    ~Fail();
     
     void draw(RenderWindow &window);
     void MoveUp();
     void MoveDown();
     int GetPressItem(){return selectedItemIndex;};
-
+    
 private:
     int selectedItemIndex;
     Font font;
-    Text title;
-    Text menu [MAX_NUMBER_OF_ITEMS];
+    Sprite gameOver; //game over image
+    Text failMenu [MAX_NUMBER_OF_FAILMENU_ITEMS];
     
 };
