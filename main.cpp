@@ -2,6 +2,7 @@
 #include <time.h>
 #include "menu.hpp"
 #include "fail.hpp"
+#include "pause.hpp"
 #include <string>
 using namespace sf;
 using namespace std;
@@ -284,7 +285,8 @@ int main()
     Fail fail(window.getSize().x, window.getSize().y);
     RectangleShape bottomBar(Vector2f(w,BAR_HEIGHT*Size));
     bottomBar.setFillColor(Color::Black);
-    int gameState = 0; // 0: main menu / 1 : 1p mode / 2 : 2p mode / 3 : 1P mode failure / 4 : 2P mode failure
+    Pause pause(window.getSize().x, window.getSize().y);
+    int gameState = 0; // 0: main menu / 1 : 1p mode / 2 : 2p mode / 3 : 1P mode failure / 4 : 2P mode failure / 5 : 1P pause state / 6 : 2P pause state
     
     Texture t1, t2, t3, t4;
     t1.loadFromFile("images/white.png");
@@ -382,10 +384,12 @@ int main()
                         if (Keyboard::isKeyPressed(Keyboard::Right) && snake.get_dir() != 1)  snake.set_dir(2);
                         if (Keyboard::isKeyPressed(Keyboard::Up) && snake.get_dir() != 0) snake.set_dir(3);
                         if (Keyboard::isKeyPressed(Keyboard::Down) && snake.get_dir() != 3) snake.set_dir(0);
-                        //gameover
-                        if (Keyboard::isKeyPressed(Keyboard::Return) && !game_start) {
-                            gameState = 0;
+                        //Pause
+                        if (Keyboard::isKeyPressed(Keyboard::Space) && game_start == true) {
+                            game_start = false;
+                            gameState = 5;
                         }
+                        
                     }
                     
                     if (gameState == 2) { // 2P STATE
@@ -399,9 +403,10 @@ int main()
                         if (Keyboard::isKeyPressed(Keyboard::D) && snake2.get_dir() != 1) snake2.set_dir(2);
                         if (Keyboard::isKeyPressed(Keyboard::W) && snake2.get_dir() != 0) snake2.set_dir(3);
                         if (Keyboard::isKeyPressed(Keyboard::S) && snake2.get_dir() != 3) snake2.set_dir(0);
-                        //gameover
-                        if (Keyboard::isKeyPressed(Keyboard::Return) && !game_start) {
-                            gameState = 0;
+                        //Pause
+                        if (Keyboard::isKeyPressed(Keyboard::Space) && game_start == true) {
+                            game_start = false;
+                            gameState = 6;
                         }
                         
                         //////////////////// add end. By Chien.
@@ -431,7 +436,37 @@ int main()
                         }
                     }
                     
-                    
+                    if (gameState == 5 || gameState == 6) { //Pause state 1P & 2P
+                        if (Keyboard::isKeyPressed(Keyboard::Up))
+                        {
+                            pause.MoveUp();
+                            break;
+                        }
+                        if (Keyboard::isKeyPressed(Keyboard::Down))
+                        {
+                            pause.MoveDown();
+                            break;
+                        }
+                        if (Keyboard::isKeyPressed(Keyboard::Return))
+                        {
+                            if (pause.GetPressItem() == 0 && gameState == 5)
+                            {
+                                game_start = true;
+                                gameState = 1;
+                            }
+                            
+                            if (pause.GetPressItem() == 0 && gameState == 6)
+                            {
+                                game_start = true;
+                                gameState = 2;
+                            }
+                            
+                            if (pause.GetPressItem() == 1) {
+                                gameState = 0;
+                            } // main menu
+                            break;
+                        }
+                    }
                     break;
             }
         }
@@ -463,8 +498,8 @@ int main()
             menu.draw(window);
         
         
-        //game state 1P & fail state 1P
-        if (gameState == 1 || gameState == 3) {
+        //game state 1P & fail state 1P & 1P pause state
+        if (gameState == 1 || gameState == 3 || gameState == 5) {
             std::string pnum = to_string(snake.get_length() - 4);
             OnePCount.setString(p1 + point + pnum);
             window.draw(OnePCount);
@@ -484,8 +519,14 @@ int main()
             sprite4.setPosition(fruit.get_pos().x*Size, (fruit.get_pos().y + BAR_HEIGHT)*Size);
             window.draw(sprite4);
             
+            //Pause
+            if(gameState == 5){
+                pause.draw(window);
+            }
+            
+            
             // GameOver
-            if (!game_start) {
+            if (!game_start && gameState != 5) {
                 gameState = 3;
                 sprite3.setPosition(w / 2 - 175, -30);
                 window.draw(sprite3);
@@ -496,7 +537,7 @@ int main()
         }
         
         //game state 2P & fail state 2P
-        if (gameState == 2 ||  gameState == 4) {
+        if (gameState == 2 ||  gameState == 4 || gameState == 6) {
             std::string p1num = to_string(snake.get_length() - 4), p2num = to_string(snake2.get_length() - 4);
             TwoPCount1.setString(p1 + point + p1num);
             TwoPCount2.setString(p2 + point + p2num);
@@ -523,8 +564,13 @@ int main()
             sprite4.setPosition(fruit.get_pos().x*Size, (fruit.get_pos().y + BAR_HEIGHT)*Size);
             window.draw(sprite4);
             
+            //Pause
+            if(gameState == 6){
+                pause.draw(window);
+            }
+            
             // GameOver
-            if (!game_start) {
+            if (!game_start && gameState != 6) {
                 gameState = 4;
                 sprite3.setPosition(w / 2 - 175, -30);
                 window.draw(sprite3);

@@ -7,12 +7,6 @@ Fail::Fail(float width, float height)
         //handle error
     }
     
-    /*Texture t3;
-    t3.loadFromFile("images/game-over.png");
-    gameOver.setTexture(t3);
-    gameOver.setPosition(Vector2f(width / 2 - 175, 0));*/
-  
-    
     failMenu[0].setFont(font);
     failMenu[0].setFillColor(Color::Red);
     failMenu[0].setString("MENU");

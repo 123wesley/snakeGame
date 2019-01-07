@@ -1,13 +1,13 @@
 #include <SFML/Graphics.hpp>
 using namespace sf;
 
-const int MAX_NUMBER_OF_FAILMENU_ITEMS = 2;
+const int MAX_NUMBER_OF_PAUSEMENU_ITEMS = 2;
 
-class Fail
+class Pause
 {
 public:
-    Fail(float width, float height);
-    ~Fail();
+    Pause(float width, float height);
+    ~Pause();
     
     void draw(RenderWindow &window);
     void MoveUp();
@@ -16,8 +16,8 @@ public:
     
 private:
     int selectedItemIndex;
+    RectangleShape pauseMenuBackground;
     Font font;
-    Sprite gameOver; //game over image
-    Text failMenu [MAX_NUMBER_OF_FAILMENU_ITEMS];
+    Text pauseMenu [MAX_NUMBER_OF_PAUSEMENU_ITEMS];
     
 };
