@@ -1,8 +1,8 @@
 #include <SFML/Graphics.hpp>
 #include <time.h>
-#include "menu.cpp"
-#include "fail.cpp"
-#include "pause.cpp"
+#include "menu.hpp"
+#include "fail.hpp"
+#include "pause.hpp"
 #include <string>
 using namespace sf;
 using namespace std;
@@ -198,7 +198,7 @@ bool Snake::Snake_Move()
     if (this->s[0].y > M - 1) this->s[0].y = 0;
     if (this->s[0].y < 0) this->s[0].y = M - 1;
     
-    for (int i = 1; i < length; i++)
+    for (int i = 1; i < length + 1; i++)
         if (this->s[0].x == this->s[i].x && this->s[0].y == this->s[i].y)
             return false;
     //this->length = i;
@@ -310,11 +310,11 @@ int main()
     // 0: main menu / 1 : 1p mode / 2 : 2p mode / 3 : 1P mode failure / 4 : 2P mode failure / 5 : 1P pause state / 6 : 2P pause state
     
     Texture t1, t2, t3, t4, t5;
-    t1.loadFromFile("images/white.png");
-    t2.loadFromFile("images/green.png");
-    t3.loadFromFile("images/game-over.png");
-    t4.loadFromFile("images/red.png");
-    t5.loadFromFile("images/blue.png");
+    t1.loadFromFile("white.png");
+    t2.loadFromFile("green.png");
+    t3.loadFromFile("game-over.png");
+    t4.loadFromFile("red.png");
+    t5.loadFromFile("blue.png");
     
     Font font;
     font.loadFromFile("font.ttf");
@@ -326,7 +326,7 @@ int main()
     Sprite sprite5(t5);
     
     Clock clock;
-    float timer = 0, delay = 0.2;
+    float timer = 0, delay = 0.1;
     
     bool game_start = true;
     
@@ -521,29 +521,32 @@ int main()
                     point2 ++;
                 }
             }
+            else
+                game_start = false;
         }
         //if one snake touches the other
-        if(snake2.Snake_Touch_2P(snake) == true){
-            Winning.setString(p1 + wins);
-            game_start = false;
-        }
-        else if(snake.Snake_Touch_2P(snake2) == true){
-            Winning.setString(p2 + wins);
-            game_start = false;
-        }
-        else if(snake.Snake_Touch_Head_2P(snake2) == true){
-            if(point1 > point2)
+        if (gameState == 2 ||  gameState == 4 || gameState == 6) {
+            if(snake2.Snake_Touch_2P(snake) == true){
                 Winning.setString(p1 + wins);
-            else if(point2 > point1)
-                Winning.setString(p2 + wins);
-            else
-            {
-                Winning.setString(tie);
-                Winning.setPosition(Size*12, 30);
+                game_start = false;
             }
-            game_start = false;
+            else if(snake.Snake_Touch_2P(snake2) == true){
+                Winning.setString(p2 + wins);
+                game_start = false;
+            }
+            else if(snake.Snake_Touch_Head_2P(snake2) == true){
+                if(point1 > point2)
+                    Winning.setString(p1 + wins);
+                else if(point2 > point1)
+                    Winning.setString(p2 + wins);
+                else
+                {
+                    Winning.setString(tie);
+                    Winning.setPosition(Size*12, 30);
+                }
+                game_start = false;
+            }
         }
-        
         
         ////// draw  ///////
         window.clear();
