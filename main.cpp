@@ -1,8 +1,8 @@
 #include <SFML/Graphics.hpp>
 #include <time.h>
-#include "menu.hpp"
-#include "fail.hpp"
-#include "pause.hpp"
+#include "menu.cpp"
+#include "fail.cpp"
+#include "pause.cpp"
 #include <string>
 using namespace sf;
 using namespace std;
@@ -310,11 +310,11 @@ int main()
     // 0: main menu / 1 : 1p mode / 2 : 2p mode / 3 : 1P mode failure / 4 : 2P mode failure / 5 : 1P pause state / 6 : 2P pause state
     
     Texture t1, t2, t3, t4, t5;
-    t1.loadFromFile("white.png");
-    t2.loadFromFile("green.png");
-    t3.loadFromFile("game-over.png");
-    t4.loadFromFile("red.png");
-    t5.loadFromFile("blue.png");
+    t1.loadFromFile("images/white.png");
+    t2.loadFromFile("images/green.png");
+    t3.loadFromFile("images/game-over.png");
+    t4.loadFromFile("images/red.png");
+    t5.loadFromFile("images/blue.png");
     
     Font font;
     font.loadFromFile("font.ttf");
@@ -326,7 +326,7 @@ int main()
     Sprite sprite5(t5);
     
     Clock clock;
-    float timer = 0, delay = 0.1;
+    float timer = 0, delay = 0.2;
     
     bool game_start = true;
     
@@ -521,16 +521,23 @@ int main()
                     point2 ++;
                 }
             }
-            else
+            else{
+                if(!snake.Snake_Move())
+                    Winning.setString(p1 + wins);
+                else
+                    Winning.setString(p2 + wins);
                 game_start = false;
+            }
         }
         //if one snake touches the other
         if (gameState == 2 ||  gameState == 4 || gameState == 6) {
-            if(snake2.Snake_Touch_2P(snake) == true){
+            if(snake2.Snake_Touch_2P(snake) == true)
+            {
                 Winning.setString(p1 + wins);
                 game_start = false;
             }
-            else if(snake.Snake_Touch_2P(snake2) == true){
+            else if(snake.Snake_Touch_2P(snake2) == true)
+            {
                 Winning.setString(p2 + wins);
                 game_start = false;
             }
@@ -547,7 +554,7 @@ int main()
                 game_start = false;
             }
         }
-        
+
         ////// draw  ///////
         window.clear();
         
@@ -638,10 +645,6 @@ int main()
                 fail.draw(window);
             }
         }
-        
-        
-        
-        
         window.display();
     }
     
