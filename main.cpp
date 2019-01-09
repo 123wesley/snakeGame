@@ -51,7 +51,7 @@ class Fruit
 {
 private:
     Pos pos;
-    int type; //different types of fruit: 0. grow 1. grow double (2. shrink)
+    int type; //different types of fruit: 0. grow 1. grow double 2. shrink
 public:
     Fruit();
     Fruit(const int& x, const int& y);
@@ -252,22 +252,25 @@ void Fruit::set_pos(const Pos& pos)
 }
 void Fruit::got_eaten_by(Snake& snake)
 {
+    int len = snake.get_length();
     if (this->type == 0)
     {
-        int len = snake.get_length();
         len++;
         snake.set_length(len);
     }
     else if (this->type == 1)
     {
-        int len = snake.get_length();
         len = len + 3;
         snake.set_length(len);
     }
     else if (this->type == 2)
     {
-        int len = snake.get_length();
         len = len - 1;
+        snake.set_length(len);
+    }
+    else if (this->type == 3)
+    {
+        len = len - 3;
         snake.set_length(len);
     }
 }
@@ -276,6 +279,7 @@ void Fruit::change_position()
     this->pos.x = rand() % N;
     this->pos.y = rand() % M;
 }
+
 /////// End of Fruit Constructors and Functions
 
 //global function
@@ -343,7 +347,8 @@ int main()
     Sprite sprite4(t4);
     
     Clock clock;
-    float timer = 0, delay = 0.1;
+    float timer = 0, delay = 0.2;
+    int freq = 0;
     
     bool game_start = true;
     
@@ -379,8 +384,8 @@ int main()
     TwoPCount1.setCharacterSize(30);
     TwoPCount2.setCharacterSize(30);
     
-    float timeF = 0;
-    bool exist = false;
+    float timeF[typeCnt] = {0};
+    bool exist[typeCnt] = {false};
     bool fruitState = false;
     
     while (window.isOpen())
@@ -388,26 +393,69 @@ int main()
         float time = clock.getElapsedTime().asSeconds();
         clock.restart();
         timer += time;
-        timeF += time;
-        
-        if (exist == false)
+        for (int i = 1; i < typeCnt; i++)
         {
-            if (timeF >= 20)
+            timeF[i] += time;
+        }
+        
+        
+        if (exist[1] == false)
+        {
+            if (timeF[1] >= 20)
             {
                 fruit[1].change_position();
-                timeF = 0;
-                exist = true;
+                timeF[1] = 0;
+                exist[1] = true;
             }
         }
         else
         {
-            if (timeF >= 15)
+            if (timeF[1] >= 15)
             {
                 fruit[1] = Fruit(1);
-                timeF = 0;
-                exist = false;
+                timeF[1] = 0;
+                exist[1] = false;
             }
         }
+        
+        if (exist[2] == false)
+        {
+            if (timeF[2] >= 10)
+            {
+                fruit[2].change_position();
+                timeF[2] = 0;
+                exist[2] = true;
+            }
+        }
+        else
+        {
+            if (timeF[2] >= 10)
+            {
+                fruit[2] = Fruit(2);
+                timeF[2] = 0;
+                exist[2] = false;
+            }
+        }
+        
+        if (exist[3] == false)
+        {
+            if (timeF[3] >= 15)
+            {
+                fruit[3].change_position();
+                timeF[3] = 0;
+                exist[3] = true;
+            }
+        }
+        else
+        {
+            if (timeF[3] >= 15)
+            {
+                fruit[3] = Fruit(3);
+                timeF[3] = 0;
+                exist[3] = false;
+            }
+        }
+        
         Event e;
         while (window.pollEvent(e))
         {
@@ -555,23 +603,23 @@ int main()
                         fruit[i].got_eaten_by(snake);
                         if (i == 0)
                             fruit[i].change_position();
-                        else if (i == 1)
+                        else
                         {
                             fruit[i] = Fruit(i);
-                            exist = false;
-                            timeF = 0;
+                            exist[i] = false;
+                            timeF[i] = 0;
                         }
                     }
                     if (snake2.get_head_pos().x == fruit[i].get_pos().x && snake2.get_head_pos().y == fruit[i].get_pos().y)
                     {
-                        fruit[i].got_eaten_by(snake);
+                        fruit[i].got_eaten_by(snake2);
                         if (i == 0)
                             fruit[i].change_position();
-                        else if (i == 1)
+                        else
                         {
                             fruit[i] = Fruit(i);
-                            exist = false;
-                            timeF = 0;
+                            exist[i] = false;
+                            timeF[i] = 0;
                         }
                     }
                 }
@@ -579,6 +627,16 @@ int main()
             else
             {
                 game_start = false;
+            }
+            freq ++;
+            if (freq == 20)
+            {
+                if (delay >= 0.08)
+                {
+                    delay = delay - 0.01;
+                    cout << delay << " ";
+                }
+                freq = 0;
             }
         }
         
@@ -633,6 +691,9 @@ int main()
             sprite4.setPosition(fruit[0].get_pos().x*Size, (fruit[0].get_pos().y + BAR_HEIGHT)*Size);
             window.draw(sprite4);
             
+            sprite2.setPosition(fruit[2].get_pos().x*Size, (fruit[2].get_pos().y + BAR_HEIGHT)*Size);
+            window.draw(sprite2);
+            
             if (fruitState == true)
             {
                 sprite4.setPosition(fruit[1].get_pos().x*Size, (fruit[1].get_pos().y + BAR_HEIGHT)*Size);
@@ -640,7 +701,11 @@ int main()
                 fruitState = false;
             }
             else
+            {
+                sprite2.setPosition(fruit[3].get_pos().x*Size, (fruit[3].get_pos().y + BAR_HEIGHT)*Size);
+                window.draw(sprite2);
                 fruitState = true;
+            }
            
             //Pause
             if(gameState == 5){
@@ -714,6 +779,9 @@ int main()
             sprite4.setPosition(fruit[0].get_pos().x*Size, (fruit[0].get_pos().y + BAR_HEIGHT)*Size);
             window.draw(sprite4);
             
+            sprite2.setPosition(fruit[2].get_pos().x*Size, (fruit[2].get_pos().y + BAR_HEIGHT)*Size);
+            window.draw(sprite2);
+            
             if (fruitState == true)
             {
                 sprite4.setPosition(fruit[1].get_pos().x*Size, (fruit[1].get_pos().y + BAR_HEIGHT)*Size);
@@ -721,7 +789,11 @@ int main()
                 fruitState = false;
             }
             else
+            {
+                sprite2.setPosition(fruit[3].get_pos().x*Size, (fruit[3].get_pos().y + BAR_HEIGHT)*Size);
+                window.draw(sprite2);
                 fruitState = true;
+            }
             
             
             //Pause
