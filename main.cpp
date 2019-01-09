@@ -13,6 +13,22 @@
 using namespace sf;
 using namespace std;
 
+/*
+Class Fruit中增加private function: int type
+Add Fruit constructor :Fruit(const int& type)把還沒有出現的fruit座標都設為負的
+Fruit::got_eaten_by(Snake& snake) snake吃了不同的fruit做出不同的反應 把fruit改變座標獨立成另一個函數
+Fruit::change_position 隨機改變fruit的座標
+main裡面：
+控制不同種的fruit出現的時間
+把有關於fruit的都改成迴圈，跑不同種的fruit
+控制速度變化
+draw的部分：
+刪了原本的白底
+畫邊界線
+設定fruit的顏色
+在gameover前印白底
+*/
+
 const int N = 30, M = 20, Size = 16, BAR_HEIGHT = 5, w = Size * N, h = Size * (M + BAR_HEIGHT), Max_Snake_Length = 100, Snake_orig_length = 4;
 const int typeCnt = 2;//可控制使用幾種fruit
 
