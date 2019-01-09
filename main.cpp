@@ -823,6 +823,7 @@ int main()
         
         window.display();
     }
+    delay = 0.2;
     
     return 0;
 }
