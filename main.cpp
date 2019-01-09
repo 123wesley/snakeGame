@@ -1,8 +1,8 @@
 #include <SFML/Graphics.hpp>
 #include <time.h>
-#include "menu.hpp"
-#include "fail.hpp"
-#include "pause.hpp"
+#include "menu.cpp"
+#include "fail.cpp"
+#include "pause.cpp"
 #include <string>
 using namespace sf;
 using namespace std;
@@ -12,9 +12,11 @@ const int N = 30, M = 20, Size = 16, BAR_HEIGHT = 5, w = Size * N, h = Size * (M
 //////////////////// Change to class to present.  By Chien.
 
 //////// Headers
-struct Pos
+class Pos
 {
+public:
     int x, y;
+    bool operator==(const Pos &pos)const;
 };
 
 class Snake
@@ -62,6 +64,14 @@ void P2_Intial_game(Snake& snake, Snake& snake2, Fruit& fruit);
 //////// End of headers
 
 //////// Snake Constructors and Functions
+
+bool Pos::operator==(const Pos &pos)const
+{
+    if(this->x == pos.x && this->y == pos.y)
+        return true;
+    else
+        return false;
+}
 
 Snake::Snake() :dir(0), length(Snake_orig_length)
 {
@@ -251,7 +261,13 @@ void Fruit::got_eaten_by(Snake& snake)
 {
     this->pos.x = rand() % N;
     this->pos.y = rand() % M;
-    
+    for(int i = 0; i < snake.get_length(); i++){
+        if(this -> pos == snake.get_i_pos(i))
+        {
+            this->pos.x = rand() % N;
+            this->pos.y = rand() % M;
+        }
+    }
     int len = snake.get_length();
     len++;
     snake.set_length(len);
@@ -326,7 +342,7 @@ int main()
     Sprite sprite5(t5);
     
     Clock clock;
-    float timer = 0, delay = 0.2;
+    float timer = 0, delay = 0.15;
     
     bool game_start = true;
     
@@ -397,8 +413,6 @@ int main()
                                 gameState = 1; // 1P
                                 P1_Intial_game(snake, fruit);
                                 P2_Intial_game(snake, snake2, fruit);
-                                point1 = 0;
-                                point2 = 0;
                             }
                             if (menu.GetPressItem() == 1)
                             {
@@ -406,8 +420,6 @@ int main()
                                 gameState = 2; // 2P
                                 P1_Intial_game(snake, fruit);
                                 P2_Intial_game(snake, snake2, fruit);
-                                point1 = 0;
-                                point2 = 0;
                             }
                             if (menu.GetPressItem() == 2) { window.close(); } // EXIT
                             break;
@@ -432,15 +444,15 @@ int main()
                     
                     if (gameState == 2) { // 2P STATE
                         
-                        if (Keyboard::isKeyPressed(Keyboard::Left) && snake2.get_dir() != 2) snake2.set_dir(1);
-                        if (Keyboard::isKeyPressed(Keyboard::Right) && snake2.get_dir() != 1)  snake2.set_dir(2);
-                        if (Keyboard::isKeyPressed(Keyboard::Up) && snake2.get_dir() != 0) snake2.set_dir(3);
-                        if (Keyboard::isKeyPressed(Keyboard::Down) && snake2.get_dir() != 3) snake2.set_dir(0);
+                        if (Keyboard::isKeyPressed(Keyboard::Left) && snake.get_dir() != 2) snake.set_dir(1);
+                        if (Keyboard::isKeyPressed(Keyboard::Right) && snake.get_dir() != 1)  snake.set_dir(2);
+                        if (Keyboard::isKeyPressed(Keyboard::Up) && snake.get_dir() != 0) snake.set_dir(3);
+                        if (Keyboard::isKeyPressed(Keyboard::Down) && snake.get_dir() != 3) snake.set_dir(0);
                         
-                        if (Keyboard::isKeyPressed(Keyboard::A) && snake.get_dir() != 2) snake.set_dir(1);
-                        if (Keyboard::isKeyPressed(Keyboard::D) && snake.get_dir() != 1) snake.set_dir(2);
-                        if (Keyboard::isKeyPressed(Keyboard::W) && snake.get_dir() != 0) snake.set_dir(3);
-                        if (Keyboard::isKeyPressed(Keyboard::S) && snake.get_dir() != 3) snake.set_dir(0);
+                        if (Keyboard::isKeyPressed(Keyboard::A) && snake2.get_dir() != 2) snake2.set_dir(1);
+                        if (Keyboard::isKeyPressed(Keyboard::D) && snake2.get_dir() != 1) snake2.set_dir(2);
+                        if (Keyboard::isKeyPressed(Keyboard::W) && snake2.get_dir() != 0) snake2.set_dir(3);
+                        if (Keyboard::isKeyPressed(Keyboard::S) && snake2.get_dir() != 3) snake2.set_dir(0);
                         //Pause
                         if (Keyboard::isKeyPressed(Keyboard::Space) && game_start == true) {
                             game_start = false;
@@ -558,7 +570,7 @@ int main()
                 game_start = false;
             }
         }
-        
+
         ////// draw  ///////
         window.clear();
         
