@@ -14,7 +14,7 @@ using namespace sf;
 using namespace std;
 
 const int N = 30, M = 20, Size = 16, BAR_HEIGHT = 5, w = Size * N, h = Size * (M + BAR_HEIGHT), Max_Snake_Length = 100, Snake_orig_length = 4;
-const int typeCnt = 2;
+const int typeCnt = 2;//可控制使用幾種fruit
 
 //////////////////// Change to class to present.  By Chien.
 
@@ -232,7 +232,7 @@ Fruit::Fruit(const int& x, const int& y, const int& type)
     this->pos.y = y;
     this->type = type;
 }
-Fruit::Fruit(const int& type) //fruits that hasn't appear
+Fruit::Fruit(const int& type) //fruits that hasn't appear 把沒有用到的fruit座標先設為負的
 {
     this->pos.x = -1;
     this->pos.y = -1;
@@ -250,7 +250,7 @@ void Fruit::set_pos(const Pos& pos)
 {
     this->pos = pos;
 }
-void Fruit::got_eaten_by(Snake& snake)
+void Fruit::got_eaten_by(Snake& snake)//蛇吃了fruit後不同的反應（把fruit座標改變另外寫成另一個function）
 {
     int len = snake.get_length();
     if (this->type == 0)
@@ -274,7 +274,7 @@ void Fruit::got_eaten_by(Snake& snake)
         snake.set_length(len);
     }
 }
-void Fruit::change_position()
+void Fruit::change_position()//fruit隨機改變座標的function
 {
     this->pos.x = rand() % N;
     this->pos.y = rand() % M;
@@ -354,7 +354,7 @@ int main()
     
     Snake snake(0, 5, 5);
     Snake snake2(0, N - 5, 5);
-    Fruit fruit[typeCnt];
+    Fruit fruit[typeCnt];//fruit改成陣列
     for (int i = 0; i < typeCnt; i++)
     {
         if (i == 0)
@@ -398,7 +398,7 @@ int main()
             timeF[i] += time;
         }
         
-        
+        ///控制不同種的fruit出現的時間
         if (exist[1] == false)
         {
             if (timeF[1] >= 20)
@@ -455,6 +455,7 @@ int main()
                 exist[3] = false;
             }
         }
+        ///
         
         Event e;
         while (window.pollEvent(e))
@@ -596,6 +597,7 @@ int main()
         {
             if (snake.Snake_Move() && snake2.Snake_Move()) {
                 timer = 0;
+                /////判定fruit有沒有被吃掉（跟原本的一樣，只是用迴圈因為fruit改成陣列）
                 for (int i = 0; i < typeCnt; i++)
                 {
                     if (snake.get_head_pos().x == fruit[i].get_pos().x && snake.get_head_pos().y == fruit[i].get_pos().y)
@@ -624,10 +626,12 @@ int main()
                     }
                 }
             }
+            /////
             else
             {
                 game_start = false;
             }
+            /////增加速度的部分
             freq ++;
             if (freq == 20)
             {
@@ -638,6 +642,7 @@ int main()
                 }
                 freq = 0;
             }
+            /////
         }
         
         
@@ -651,7 +656,7 @@ int main()
         
         //game state 1P & fail state 1P & 1P pause state
         if (gameState == 1 || gameState == 3 || gameState == 5) {
-            
+            /////劃邊界線
             Vertex line1[] =
             {
                 Vertex(Vector2f(0, BAR_HEIGHT*Size)),
@@ -677,6 +682,7 @@ int main()
             window.draw(line2, 2, Lines);
             window.draw(line3, 2, Lines);
             window.draw(line4, 2, Lines);
+            /////
             
             std::string pnum = to_string(snake.get_length() - 4);
             OnePCount.setString(p1 + point + pnum);
@@ -688,6 +694,7 @@ int main()
                 window.draw(sprite2);
             }
             
+            /////draw fruit
             sprite4.setPosition(fruit[0].get_pos().x*Size, (fruit[0].get_pos().y + BAR_HEIGHT)*Size);
             window.draw(sprite4);
             
@@ -706,7 +713,8 @@ int main()
                 window.draw(sprite2);
                 fruitState = true;
             }
-           
+           /////
+            
             //Pause
             if(gameState == 5){
                 pause.draw(window);
@@ -732,7 +740,7 @@ int main()
         
         //game state 2P & fail state 2P
         if (gameState == 2 ||  gameState == 4 || gameState == 6) {
-            
+            /////劃邊界線
             Vertex line1[] =
             {
                 Vertex(Vector2f(0, BAR_HEIGHT*Size)),
@@ -758,6 +766,7 @@ int main()
             window.draw(line2, 2, Lines);
             window.draw(line3, 2, Lines);
             window.draw(line4, 2, Lines);
+            /////
             
             std::string p1num = to_string(snake.get_length() - 4), p2num = to_string(snake2.get_length() - 4);
             TwoPCount1.setString(p1 + point + p1num);
@@ -776,6 +785,7 @@ int main()
                 window.draw(sprite2);
             }
             
+            /////draw fruit
             sprite4.setPosition(fruit[0].get_pos().x*Size, (fruit[0].get_pos().y + BAR_HEIGHT)*Size);
             window.draw(sprite4);
             
@@ -794,7 +804,7 @@ int main()
                 window.draw(sprite2);
                 fruitState = true;
             }
-            
+            /////
             
             //Pause
             if(gameState == 6){
