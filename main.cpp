@@ -221,7 +221,7 @@ bool Snake::Snake_Move()
 
 bool Snake::Snake_Touch_2P(const Snake &snake)
 {
-	for (int i = 1; i < length; i++)
+	for (int i = 1; i < snake.length; i++)
 	{
 		if (this->s[0].x == snake.s[i].x && this->s[0].y == snake.s[i].y)
 			return true;
@@ -276,7 +276,7 @@ void Fruit::set_pos(const Pos& pos)
 void Fruit::got_eaten_by(Snake& snake)
 {
 	int len = snake.get_length();
-	printf("%d\n",len);
+	printf("%d\n", len);
 	if (this->type == 0)
 	{
 		len++;
