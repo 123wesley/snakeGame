@@ -4,10 +4,13 @@
 #include "fail.cpp"
 #include "pause.cpp"
 #include <string>
+#include <iostream>
+
 using namespace sf;
 using namespace std;
 
 const int N = 30, M = 20, Size = 16, BAR_HEIGHT = 5, w = Size * N, h = Size * (M + BAR_HEIGHT), Max_Snake_Length = 100, Snake_orig_length = 4;
+const int typeCnt = 2;//可控制使用幾種fruit
 
 //////////////////// Change to class to present.  By Chien.
 
@@ -48,13 +51,17 @@ class Fruit
 {
 private:
     Pos pos;
+    int type; //different types of fruit: 0. grow 1. grow double 2. shrink 3. shrink double
 public:
     Fruit();
+    Fruit(const int& type);
     Fruit(const int& x, const int& y);
+    Fruit(const int& x, const int& y, const int& type);
     ~Fruit();
     Pos get_pos();
     void set_pos(const Pos& pos);
     void got_eaten_by(Snake& snake);
+    void change_position();
 };
 
 //global function
@@ -245,6 +252,18 @@ Fruit::Fruit(const int& x, const int& y)
     this->pos.x = x;
     this->pos.y = y;
 }
+Fruit::Fruit(const int& type) //fruits that hasn't appear 把沒有用到的fruit座標先設為負的
+{
+    this->pos.x = -1;
+    this->pos.y = -1;
+    this->type = type;
+}
+Fruit::Fruit(const int& x, const int& y, const int& type)
+{
+    this->pos.x = x;
+    this->pos.y = y;
+    this->type = type;
+}
 Fruit::~Fruit()
 {
 }
@@ -257,20 +276,34 @@ void Fruit::set_pos(const Pos& pos)
 {
     this->pos = pos;
 }
-void Fruit::got_eaten_by(Snake& snake)
+void Fruit::got_eaten_by(Snake& snake)//蛇吃了fruit後不同的反應（把fruit座標改變另外寫成另一個function）
+{
+    int len = snake.get_length();
+    if (this->type == 0)
+    {
+        len++;
+        snake.set_length(len);
+    }
+    else if (this->type == 1)
+    {
+        len = len + 3;
+        snake.set_length(len);
+    }
+    else if (this->type == 2)
+    {
+        len = len - 1;
+        snake.set_length(len);
+    }
+    else if (this->type == 3)
+    {
+        len = len - 3;
+        snake.set_length(len);
+    }
+}
+void Fruit::change_position()//fruit隨機改變座標的function
 {
     this->pos.x = rand() % N;
     this->pos.y = rand() % M;
-    for(int i = 0; i < snake.get_length(); i++){
-        if(this -> pos == snake.get_i_pos(i))
-        {
-            this->pos.x = rand() % N;
-            this->pos.y = rand() % M;
-        }
-    }
-    int len = snake.get_length();
-    len++;
-    snake.set_length(len);
 }
 /////// End of Fruit Constructors and Functions
 
@@ -326,14 +359,25 @@ int main()
     // 0: main menu / 1 : 1p mode / 2 : 2p mode / 3 : 1P mode failure / 4 : 2P mode failure / 5 : 1P pause state / 6 : 2P pause state
     
     Texture t1, t2, t3, t4, t5;
+    /*
     t1.loadFromFile("images/white.png");
     t2.loadFromFile("images/green.png");
     t3.loadFromFile("images/game-over.png");
     t4.loadFromFile("images/red.png");
     t5.loadFromFile("images/blue.png");
+    */
+    
+    t1.loadFromFile("/Users/chihsin1/Desktop/Snake/snakeGame2p/snakeGame2p/white.png");
+    t2.loadFromFile("/Users/chihsin1/Desktop/Snake/snakeGame2p/snakeGame2p/green.png");
+    t3.loadFromFile("/Users/chihsin1/Desktop/Snake/snakeGame2p/snakeGame2p/game-over.png");
+    t4.loadFromFile("/Users/chihsin1/Desktop/Snake/snakeGame2p/snakeGame2p/red.png");
+    t5.loadFromFile("/Users/chihsin1/Desktop/Snake/snakeGame2p/snakeGame2p/blue.png");
     
     Font font;
-    font.loadFromFile("font.ttf");
+    /*
+     font.loadFromFile("font.ttf");
+     */
+    font.loadFromFile("/Users/chihsin1/Desktop/Snake/snakeGame2p/snakeGame2p/font.ttf");
     
     Sprite sprite1(t1);
     Sprite sprite2(t2);
@@ -342,13 +386,21 @@ int main()
     Sprite sprite5(t5);
     
     Clock clock;
-    float timer = 0, delay = 0.15;
+    float timer = 0, delay = 0.2;
+    int freq = 0;
     
     bool game_start = true;
     
     Snake snake(0, 5, 5);
     Snake snake2(0, N - 5, 5);
-    Fruit fruit(10, 10);
+    Fruit fruit[typeCnt];//fruit改成陣列
+    for (int i = 0; i < typeCnt; i++)
+    {
+        if (i == 0)
+            fruit[i] = Fruit(10, 10, i);
+        else
+            fruit[i] = Fruit(i);
+    }
     
     string point = "Point: ", p1 = "1P ", p2 = "2P ";
     Text OnePCount;
@@ -381,11 +433,79 @@ int main()
     int point1 = 0;
     int point2 = 0;
     
+    //time
+    float timeF[typeCnt] = {0};
+    bool exist[typeCnt] = {false};
+    bool fruitState = false;
+    
     while (window.isOpen())
     {
         float time = clock.getElapsedTime().asSeconds();
         clock.restart();
         timer += time;
+        for (int i = 1; i < typeCnt; i++)
+        {
+            timeF[i] += time;
+        }
+        
+        ///控制不同種的fruit出現的時間
+        if (exist[1] == false)
+        {
+            if (timeF[1] >= 20)
+            {
+                fruit[1].change_position();
+                timeF[1] = 0;
+                exist[1] = true;
+            }
+        }
+        else
+        {
+            if (timeF[1] >= 15)
+            {
+                fruit[1] = Fruit(1);
+                timeF[1] = 0;
+                exist[1] = false;
+            }
+        }
+        
+        if (exist[2] == false)
+        {
+            if (timeF[2] >= 10)
+            {
+                fruit[2].change_position();
+                timeF[2] = 0;
+                exist[2] = true;
+            }
+        }
+        else
+        {
+            if (timeF[2] >= 10)
+            {
+                fruit[2] = Fruit(2);
+                timeF[2] = 0;
+                exist[2] = false;
+            }
+        }
+        
+        if (exist[3] == false)
+        {
+            if (timeF[3] >= 15)
+            {
+                fruit[3].change_position();
+                timeF[3] = 0;
+                exist[3] = true;
+            }
+        }
+        else
+        {
+            if (timeF[3] >= 15)
+            {
+                fruit[3] = Fruit(3);
+                timeF[3] = 0;
+                exist[3] = false;
+            }
+        }
+        ///
         
         Event e;
         while (window.pollEvent(e))
@@ -411,15 +531,15 @@ int main()
                             {
                                 game_start = true;
                                 gameState = 1; // 1P
-                                P1_Intial_game(snake, fruit);
-                                P2_Intial_game(snake, snake2, fruit);
+                                P1_Intial_game(snake, fruit[0]);
+                                P2_Intial_game(snake, snake2, fruit[0]);
                             }
                             if (menu.GetPressItem() == 1)
                             {
                                 game_start = true;
                                 gameState = 2; // 2P
-                                P1_Intial_game(snake, fruit);
-                                P2_Intial_game(snake, snake2, fruit);
+                                P1_Intial_game(snake, fruit[0]);
+                                P2_Intial_game(snake, snake2, fruit[0]);
                             }
                             if (menu.GetPressItem() == 2) { window.close(); } // EXIT
                             break;
@@ -528,13 +648,32 @@ int main()
             //if snake does not touches itself
             if (snake.Snake_Move() && snake2.Snake_Move()) {
                 timer = 0;
-                if (snake.get_head_pos().x == fruit.get_pos().x && snake.get_head_pos().y == fruit.get_pos().y) {
-                    fruit.got_eaten_by(snake);
-                    point1 ++;
-                }
-                if (snake2.get_head_pos().x == fruit.get_pos().x && snake2.get_head_pos().y == fruit.get_pos().y) {
-                    fruit.got_eaten_by(snake2);
-                    point2 ++;
+                for (int i = 0; i < typeCnt; i++)
+                {
+                    if (snake.get_head_pos().x == fruit[i].get_pos().x && snake.get_head_pos().y == fruit[i].get_pos().y) {
+                        fruit[i].got_eaten_by(snake);
+                        if (i == 0)
+                            fruit[i].change_position();
+                        else
+                        {
+                            fruit[i] = Fruit(i);
+                            exist[i] = false;
+                            timeF[i] = 0;
+                        }
+                        point1 ++;
+                    }
+                    if (snake2.get_head_pos().x == fruit[i].get_pos().x && snake2.get_head_pos().y == fruit[i].get_pos().y) {
+                        fruit[i].got_eaten_by(snake2);
+                        point2 ++;
+                        if (i == 0)
+                            fruit[i].change_position();
+                        else
+                        {
+                            fruit[i] = Fruit(i);
+                            exist[i] = false;
+                            timeF[i] = 0;
+                        }
+                    }
                 }
             }
             else{
@@ -543,6 +682,18 @@ int main()
                 else
                     Winning.setString(p2 + wins);
                 game_start = false;
+            }
+            window.display();
+            
+            freq ++;
+            if (freq == 20)
+            {
+                if (delay >= 0.08)
+                {
+                    delay = delay - 0.01;
+                    cout << delay << " ";
+                }
+                freq = 0;
             }
         }
         //if one snake touches the other
@@ -570,7 +721,7 @@ int main()
                 game_start = false;
             }
         }
-
+        
         ////// draw  ///////
         window.clear();
         
@@ -584,12 +735,32 @@ int main()
             std::string pnum = to_string(point1);
             OnePCount.setString(p1 + point + pnum);
             window.draw(OnePCount);
-            for (int i = 0; i < N; i++)
-                for (int j = BAR_HEIGHT; j < M + BAR_HEIGHT; j++)
-                {
-                    sprite1.setPosition(i*Size, j*Size);
-                    window.draw(sprite1);
-                }
+            
+            Vertex line1[] =
+            {
+                Vertex(Vector2f(0, BAR_HEIGHT*Size)),
+                Vertex(Vector2f(N*Size, BAR_HEIGHT*Size))
+            };
+            Vertex line2[] =
+            {
+                Vertex(Vector2f(0, BAR_HEIGHT*Size)),
+                Vertex(Vector2f(0, M*Size + BAR_HEIGHT*Size))
+            };
+            Vertex line3[] =
+            {
+                Vertex(Vector2f(0, M*Size + BAR_HEIGHT*Size)),
+                Vertex(Vector2f(N*Size, M*Size + BAR_HEIGHT*Size))
+            };
+            Vertex line4[] =
+            {
+                Vertex(Vector2f(N*Size, M*Size + BAR_HEIGHT*Size)),
+                Vertex(Vector2f(N*Size, BAR_HEIGHT*Size))
+            };
+            
+            window.draw(line1, 2, Lines);
+            window.draw(line2, 2, Lines);
+            window.draw(line3, 2, Lines);
+            window.draw(line4, 2, Lines);
             
             for (int i = 0; i < snake.get_length(); i++)
             {
@@ -597,8 +768,29 @@ int main()
                 window.draw(sprite2);
             }
             
-            sprite4.setPosition(fruit.get_pos().x*Size, (fruit.get_pos().y + BAR_HEIGHT)*Size);
+            sprite4.setPosition(fruit[0].get_pos().x*Size, (fruit[0].get_pos().y + BAR_HEIGHT)*Size);
             window.draw(sprite4);
+            
+            /////draw fruit
+            sprite4.setPosition(fruit[0].get_pos().x*Size, (fruit[0].get_pos().y + BAR_HEIGHT)*Size);
+            window.draw(sprite4);
+            
+            sprite2.setPosition(fruit[2].get_pos().x*Size, (fruit[2].get_pos().y + BAR_HEIGHT)*Size);
+            window.draw(sprite2);
+            
+            if (fruitState == true)
+            {
+                sprite4.setPosition(fruit[1].get_pos().x*Size, (fruit[1].get_pos().y + BAR_HEIGHT)*Size);
+                window.draw(sprite4);
+                fruitState = false;
+            }
+            else
+            {
+                sprite2.setPosition(fruit[3].get_pos().x*Size, (fruit[3].get_pos().y + BAR_HEIGHT)*Size);
+                window.draw(sprite2);
+                fruitState = true;
+            }
+            /////
             
             //Pause
             if(gameState == 5){
@@ -608,6 +800,12 @@ int main()
             
             // GameOver
             if (!game_start && gameState != 5) {
+                for (int i = 0; i < N; i++)
+                    for (int j = BAR_HEIGHT; j < M + BAR_HEIGHT; j++)
+                    {
+                        sprite1.setPosition(i*Size, j*Size);
+                        window.draw(sprite1);
+                    }
                 gameState = 3;
                 sprite3.setPosition(w / 2 - 175, -30);
                 window.draw(sprite3);
@@ -624,12 +822,34 @@ int main()
             TwoPCount2.setString(p2 + point + p2num);
             window.draw(TwoPCount1);
             window.draw(TwoPCount2);
-            for (int i = 0; i < N; i++)
-                for (int j = BAR_HEIGHT; j < M + BAR_HEIGHT; j++)
-                {
-                    sprite1.setPosition(i*Size, j*Size);
-                    window.draw(sprite1);
-                }
+            
+            /////劃邊界線
+            Vertex line1[] =
+            {
+                Vertex(Vector2f(0, BAR_HEIGHT*Size)),
+                Vertex(Vector2f(N*Size, BAR_HEIGHT*Size))
+            };
+            Vertex line2[] =
+            {
+                Vertex(Vector2f(0, BAR_HEIGHT*Size)),
+                Vertex(Vector2f(0, M*Size + BAR_HEIGHT*Size))
+            };
+            Vertex line3[] =
+            {
+                Vertex(Vector2f(0, M*Size + BAR_HEIGHT*Size)),
+                Vertex(Vector2f(N*Size, M*Size + BAR_HEIGHT*Size))
+            };
+            Vertex line4[] =
+            {
+                Vertex(Vector2f(N*Size, M*Size + BAR_HEIGHT*Size)),
+                Vertex(Vector2f(N*Size, BAR_HEIGHT*Size))
+            };
+            
+            window.draw(line1, 2, Lines);
+            window.draw(line2, 2, Lines);
+            window.draw(line3, 2, Lines);
+            window.draw(line4, 2, Lines);
+            /////
             
             for (int i = 0; i < snake.get_length(); i++)
             {
@@ -642,8 +862,26 @@ int main()
                 window.draw(sprite5);
             }
             
-            sprite4.setPosition(fruit.get_pos().x*Size, (fruit.get_pos().y + BAR_HEIGHT)*Size);
+            /////draw fruit
+            sprite4.setPosition(fruit[0].get_pos().x*Size, (fruit[0].get_pos().y + BAR_HEIGHT)*Size);
             window.draw(sprite4);
+            
+            sprite2.setPosition(fruit[2].get_pos().x*Size, (fruit[2].get_pos().y + BAR_HEIGHT)*Size);
+            window.draw(sprite2);
+            
+            if (fruitState == true)
+            {
+                sprite4.setPosition(fruit[1].get_pos().x*Size, (fruit[1].get_pos().y + BAR_HEIGHT)*Size);
+                window.draw(sprite4);
+                fruitState = false;
+            }
+            else
+            {
+                sprite2.setPosition(fruit[3].get_pos().x*Size, (fruit[3].get_pos().y + BAR_HEIGHT)*Size);
+                window.draw(sprite2);
+                fruitState = true;
+            }
+            /////
             
             //Pause
             if(gameState == 6){
@@ -652,6 +890,12 @@ int main()
             
             // GameOver
             if (!game_start && gameState != 6) {
+                for (int i = 0; i < N; i++)
+                    for (int j = BAR_HEIGHT; j < M + BAR_HEIGHT; j++)
+                    {
+                        sprite1.setPosition(i*Size, j*Size);
+                        window.draw(sprite1);
+                    }
                 gameState = 4;
                 sprite3.setPosition(w / 2 - 175, -30);
                 window.draw(sprite3);
@@ -661,8 +905,9 @@ int main()
                 fail.draw(window);
             }
         }
-        window.display();
+        
     }
+    delay = 0;
     
     return 0;
 }
