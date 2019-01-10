@@ -359,26 +359,19 @@ int main()
     // 0: main menu / 1 : 1p mode / 2 : 2p mode / 3 : 1P mode failure / 4 : 2P mode failure / 5 : 1P pause state / 6 : 2P pause state
     
     Texture t1, t2, t3, t4, t5;
-    /*
+    
     t1.loadFromFile("images/white.png");
     t2.loadFromFile("images/green.png");
     t3.loadFromFile("images/game-over.png");
     t4.loadFromFile("images/red.png");
     t5.loadFromFile("images/blue.png");
-    */
     
-    t1.loadFromFile("/Users/chihsin1/Desktop/Snake/snakeGame2p/snakeGame2p/white.png");
-    t2.loadFromFile("/Users/chihsin1/Desktop/Snake/snakeGame2p/snakeGame2p/green.png");
-    t3.loadFromFile("/Users/chihsin1/Desktop/Snake/snakeGame2p/snakeGame2p/game-over.png");
-    t4.loadFromFile("/Users/chihsin1/Desktop/Snake/snakeGame2p/snakeGame2p/red.png");
-    t5.loadFromFile("/Users/chihsin1/Desktop/Snake/snakeGame2p/snakeGame2p/blue.png");
+    
     
     Font font;
-    /*
-     font.loadFromFile("font.ttf");
-     */
-    font.loadFromFile("/Users/chihsin1/Desktop/Snake/snakeGame2p/snakeGame2p/font.ttf");
-    
+   
+    font.loadFromFile("font.ttf");
+     
     Sprite sprite1(t1);
     Sprite sprite2(t2);
     Sprite sprite3(t3);
@@ -907,7 +900,7 @@ int main()
         }
         
     }
-    delay = 0;
+    delay = 0.2;
     
     return 0;
 }
