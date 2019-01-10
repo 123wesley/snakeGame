@@ -652,25 +652,29 @@ int main()
                     if (snake.get_head_pos().x == fruit[i].get_pos().x && snake.get_head_pos().y == fruit[i].get_pos().y) {
                         fruit[i].got_eaten_by(snake);
                         if (i == 0)
+                        {
                             fruit[i].change_position();
+                            point1 ++;
+                        }
                         else
                         {
                             fruit[i] = Fruit(i);
                             exist[i] = false;
                             timeF[i] = 0;
+                            point1 = point1 + 3;
                         }
-                        point1 ++;
                     }
                     if (snake2.get_head_pos().x == fruit[i].get_pos().x && snake2.get_head_pos().y == fruit[i].get_pos().y) {
-                        fruit[i].got_eaten_by(snake2);
-                        point2 ++;
-                        if (i == 0)
+                        if (i == 0){
                             fruit[i].change_position();
+                            point2 ++;
+                        }
                         else
                         {
                             fruit[i] = Fruit(i);
                             exist[i] = false;
                             timeF[i] = 0;
+                            point2 = point2 + 3;
                         }
                     }
                 }
