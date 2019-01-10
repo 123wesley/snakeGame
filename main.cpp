@@ -369,9 +369,9 @@ int main()
     
     
     Font font;
-   
+    
     font.loadFromFile("font.ttf");
-     
+    
     Sprite sprite1(t1);
     Sprite sprite2(t2);
     Sprite sprite3(t3);
@@ -676,7 +676,6 @@ int main()
                     Winning.setString(p2 + wins);
                 game_start = false;
             }
-            window.display();
             
             freq ++;
             if (freq == 20)
@@ -898,9 +897,8 @@ int main()
                 fail.draw(window);
             }
         }
-        
+        window.display();
     }
     delay = 0.2;
-    
     return 0;
 }
