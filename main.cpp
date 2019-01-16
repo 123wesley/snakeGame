@@ -8,7 +8,7 @@ using namespace sf;
 using namespace std;
 
 const int N = 30, M = 20, Size = 16, BAR_HEIGHT = 5, w = Size * N, h = Size * (M + BAR_HEIGHT), Max_Snake_Length = 100, Snake_orig_length = 4;
-const int typeCnt = 1;//可控制使用幾種fruit
+const int typeCnt = 2;//可控制使用幾種fruit
 //////////////////// Change to class to present.  By Chien.
 
 //////// Headers
@@ -458,7 +458,7 @@ int main()
 		///控制不同種的fruit出現的時間
 		if (exist[1] == false)
 		{
-			if (timeF[1] >= 20)
+			if (timeF[1] >= 10) 
 			{
 				fruit[1].change_position(snake, snake2);
 				timeF[1] = 0;
@@ -467,7 +467,7 @@ int main()
 		}
 		else
 		{
-			if (timeF[1] >= 15)
+			if (timeF[1] >= 10)
 			{
 				fruit[1] = Fruit(1);
 				timeF[1] = 0;
@@ -544,6 +544,10 @@ int main()
 							point1 = 0;
 							point2 = 0;
 							delay = 0.2;
+							for (int i = 1; i < typeCnt; i++)
+							{
+								timeF[i] = 0;
+							}
 						}
 						if (menu.GetPressItem() == 1)
 						{
@@ -554,6 +558,10 @@ int main()
 							point1 = 0;
 							point2 = 0;
 							delay = 0.2;
+							for (int i = 1; i < typeCnt; i++)
+							{
+								timeF[i] = 0;
+							}
 						}
 						if (menu.GetPressItem() == 2) { window.close(); } // EXIT
 						break;
@@ -702,7 +710,7 @@ int main()
 			{
 				if (delay >= 0.08)
 				{
-					delay = delay - 0.005;
+					delay = delay - 0.01; // 0.005
 					//std::cout << delay << " ";
 				}
 				freq = 0;
@@ -742,7 +750,18 @@ int main()
 		if (gameState == 0)
 			menu.draw(window);
 
+		
+		// GameOver BackGround
+		if (!game_start && gameState != 6 && gameState != 5) {
+			for (int i = 0; i < N; i++)
+				for (int j = BAR_HEIGHT; j < M + BAR_HEIGHT; j++)
+				{
+					sprite1.setPosition(i*Size, j*Size);
+					window.draw(sprite1);
+				}
 
+		}
+        
 		//game state 1P & fail state 1P & 1P pause state
 		if (gameState == 1 || gameState == 3 || gameState == 5) {
 			std::string pnum = to_string(point1);
@@ -823,6 +842,7 @@ int main()
 			TwoPCount1.setString(p1 + point + p1num);
 			TwoPCount2.setString(p2 + point + p2num);
 			window.draw(TwoPCount1);
+			window.draw(TwoPCount2);
 			/////劃邊界線
 			Vertex line1[] =
 			{
@@ -878,14 +898,8 @@ int main()
 				pause.draw(window);
 			}
 
-			// GameOver
+			//Gameover
 			if (!game_start && gameState != 6) {
-				for (int i = 0; i < N; i++)
-					for (int j = BAR_HEIGHT; j < M + BAR_HEIGHT; j++)
-					{
-						sprite1.setPosition(i*Size, j*Size);
-						window.draw(sprite1);
-					}
 				gameState = 4;
 				sprite3.setPosition(w / 2 - 175, -30);
 				window.draw(sprite3);
@@ -894,6 +908,7 @@ int main()
 				window.draw(Winning);
 				fail.draw(window);
 			}
+			
 		}
 		window.display();
 	}
